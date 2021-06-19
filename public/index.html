@@ -3,5 +3,12 @@
     <head></head>
     <body>
         Chat App
-    </body>
+    <form id="message-form">
+        <input name="message" type="text" autocomplete="off" placeholder="Please type your message"> 
+        <button id="Send Message">Send</button>
+    </form>
+    <button id="Send-Location">Send Location</button>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/chat.js"></script>
+   </body>
 </html>

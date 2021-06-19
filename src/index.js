@@ -13,15 +13,25 @@ const publicDirectoryPath= path.join(__dirname,'../public')
 
 app.use(express.static(publicDirectoryPath))
 
-let count=0
+// let count=0
+let message="Welcome New User"
 
 io.on('connection',(socket)=>{
-    console.log('New Websocket Connection')
-    count=count+1
-    socket.emit('countUpdated',count)
-    socket.on('increment',()=>{
-        
+    console.log('New User Connected')
+    
+    socket.emit('message','Weclome')
+    socket.broadcast.emit('message','A new user has joined!')
+    
+    socket.on('sendMessage',(message)=>{      
+        io.emit('message',message)
     })
+    socket.on('sendLocation',(coords)=>{
+        io.emit('message',`https://google.com/maps?q=${coords.latitude},${coords.longitude}`)
+    })
+    socket.on('disconnect',()=>{
+        io.emit('message','A user has left!')
+    })
+
 })
 
 server.listen(port,()=>{
