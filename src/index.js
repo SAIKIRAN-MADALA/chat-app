@@ -3,6 +3,7 @@ const path=require('path')
 const http=require('http')
 const socketio=require('socket.io')
 const Filter=require('bad-words')
+const {generateMessage, generateLocationMessage} =require('./utils/messages')
 
 const app=express()
 const server=http.createServer(app)
@@ -18,26 +19,39 @@ app.use(express.static(publicDirectoryPath))
 let message="Welcome New User"
 
 io.on('connection',(socket)=>{
+    
     console.log('New User Connected')
     
-    socket.emit('message','Weclome')
-    socket.broadcast.emit('message','A new user has joined!')
     
+    socket.on('join',({username,room})=>{
+        socket.join(room)
+
+        socket.emit('message',generateMessage('Welcome!'))
+        socket.broadcast.to(room).emit('message',generateMessage(`${username} has Joined`))
+
+        //socket.emit,io.emit,socket.broadcast.emit
+        //io.toemit :emits an event to everybody in a room
+        //socket.broadcast.to.emit limit to specific chat rooms
+
+    })
+
     socket.on('sendMessage',(message,callback)=>{      
         const filter= new Filter({placeHolder:'*'})
         if(filter.isProfane(message)){
             filter.clean(message)
             return callback('Profanity is Not Allowed',message)
         }
-        io.emit('message',message)
+        io.to('India').emit('message',generateMessage(message))
         callback()
     })
+
     socket.on('sendLocation',(coords,callback)=>{
-        io.emit('message',`https://google.com/maps?q=${coords.latitude},${coords.longitude}`)
+        io.emit('locationMessage',generateLocationMessage(`https://google.com/maps?q=${coords.latitude},${coords.longitude}`))
         callback()
     })
+
     socket.on('disconnect',()=>{
-        io.emit('message','A user has left!')
+        io.emit('message',generateMessage('A user has left!'))
     })
 
 })
